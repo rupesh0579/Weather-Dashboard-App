@@ -1,8 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import usePrefStore from "../store/prefStore";
 import type { ForecastItem } from "../types/weather";
 import { fetchCurrentWeather, fetchForecast, searchCities } from "../api/weatherServices";
+
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 export default function WeatherView() {
   const { defaultCity, units, favorites, getTemperatureUnit, getWindSpeedUnit } = usePrefStore();
@@ -10,25 +20,28 @@ export default function WeatherView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
 
+  const debouncedSearch = useDebounce(searchQuery, 500);
+
   const { data: current, isLoading: currentLoading, error: currentError } = useQuery({
     queryKey: ["weather", selectedCity, units],
     queryFn: () => fetchCurrentWeather(selectedCity, units),
     retry: 2,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, //5mnt
   });
 
   const { data: forecast, isLoading: forecastLoading } = useQuery({
     queryKey: ["forecast", selectedCity, units],
     queryFn: () => fetchForecast(selectedCity, units),
     retry: 2,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 60 * 1000, //10mnt
   });
 
-  const { data: searchResults } = useQuery({
-    queryKey: ["search", searchQuery],
-    queryFn: () => searchCities(searchQuery),
-    enabled: searchQuery.length > 2,
-    staleTime: 30 * 60 * 1000, // 30 minutes
+  // Debounced city search
+  const { data: searchResults, isFetching: searching } = useQuery({
+    queryKey: ["search", debouncedSearch],
+    queryFn: () => searchCities(debouncedSearch),
+    enabled: debouncedSearch.length > 2,
+    staleTime: 30 * 60 * 1000, 
   });
 
   const formatTime = (timestamp: number) => {
@@ -62,7 +75,7 @@ export default function WeatherView() {
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           <h3 className="font-bold">Error loading weather data</h3>
           <p>{currentError instanceof Error ? currentError.message : "An error occurred"}</p>
-          <button 
+          <button
             onClick={() => setSelectedCity(defaultCity)}
             className="mt-2 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
           >
@@ -74,7 +87,7 @@ export default function WeatherView() {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="space-y-6 ">
       {/* City Selection */}
       <div className="bg-white p-4 rounded-lg shadow">
         <div className="flex flex-wrap gap-2 mb-4">
@@ -109,6 +122,11 @@ export default function WeatherView() {
               placeholder="Search city..."
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
+            {searching && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+                Searching…
+              </div>
+            )}
             {searchResults && searchResults.length > 0 && (
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md mt-1 shadow-lg z-10">
                 {searchResults.map((result, idx) => (
@@ -136,7 +154,7 @@ export default function WeatherView() {
           </div>
         </div>
       ) : current ? (
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-lg shadow ">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-800">{current.name}</h2>
             <div className="text-right">
@@ -209,7 +227,7 @@ export default function WeatherView() {
           <h3 className="text-xl font-bold mb-4">5-Day Forecast</h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {forecast.list
-              .filter((_, index) => index % 8 === 0) // Get one forecast per day (every 8th item for 3-hour intervals)
+              .filter((_, index) => index % 8 === 0)
               .slice(0, 5)
               .map((f: ForecastItem, idx: number) => (
                 <div key={idx} className="text-center p-3 bg-purple-100 rounded transform hover:scale-110 transition-transform duration-200">
@@ -245,7 +263,7 @@ export default function WeatherView() {
           <div className="overflow-x-auto">
             <div className="flex space-x-4 min-w-max">
               {forecast.list.slice(0, 8).map((f: ForecastItem, idx: number) => (
-                <div key={idx} className="text-center flex-shrink-0 w-20">
+                <div key={idx} className="text-center flex-shrink-0 w-34">
                   <div className="text-sm font-medium mb-2">
                     {formatTime(f.dt)}
                   </div>

@@ -41,6 +41,7 @@ export async function fetchForecast(city: string, units: string): Promise<{ list
     const res = await weatherApi.get(`/forecast`, { 
       params: { q: city, units, appid: WEATHER_API_KEY, cnt: 40 } 
     });
+    console.log("res wala data", res.data)
     return res.data;
   } catch (error) {
     if (error instanceof Error) {

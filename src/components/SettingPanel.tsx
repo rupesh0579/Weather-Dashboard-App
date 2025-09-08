@@ -56,15 +56,9 @@ export default function SettingsPanel() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow space-y-6">
-      <h3 className="text-xl font-bold text-gray-800">
-        Settings & Preferences
-      </h3>
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         
         <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-gray-700">General</h4>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Default City
@@ -181,23 +175,6 @@ export default function SettingsPanel() {
           </button>
         </div>
       </form>
-
-      {/* User Info */}
-      {user && (
-        <div className="border-t pt-4">
-          <h4 className="text-lg font-semibold text-gray-700 mb-2">
-            Account Information
-          </h4>
-          <div className="bg-gray-100 p-3 rounded">
-            <p className="text-sm">
-              <strong>Name:</strong> {user.name}
-            </p>
-            <p className="text-sm">
-              <strong>Email:</strong> {user.email}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

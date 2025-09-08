@@ -3,7 +3,7 @@ import useAuthStore from "../store/authStore";
 const Header = () => {
     const { isAuthenticated, user } = useAuthStore();
   return (
-   <header className="bg-gradient-to-r from-purple-800 to-blue-800 text-white shadow-lg">
+   <header className="bg-gradient-to-r from-purple-800 to-blue-800 text-white shadow-lg px-4 md:px-24">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
