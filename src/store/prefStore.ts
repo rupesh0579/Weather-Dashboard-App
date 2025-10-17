@@ -17,6 +17,14 @@ interface PrefState {
   removeFromFavorites: (city: string) => void;
   getTemperatureUnit: () => string;
   getWindSpeedUnit: () => string;
+
+  getClasses: () => {
+    cardClass: string;
+    labelClass: string;
+    inputClass: string;
+    subTextClass: string;
+    cardClassName: string;
+  };
 }
 
 const usePrefStore = create<PrefState>()(
@@ -56,6 +64,26 @@ const usePrefStore = create<PrefState>()(
       getWindSpeedUnit: () => {
         const { units } = get();
         return units === "metric" ? "m/s" : "mph";
+      },
+      getClasses: () => {
+        const { theme } = get();
+        return {
+          cardClass:
+            theme === "dark"
+              ? "bg-gray-800 text-gray-100 border border-gray-700"
+              : "bg-white text-gray-900 border border-gray-200",
+ 
+          labelClass: theme === "dark" ? "text-gray-200" : "text-gray-700",
+ 
+          inputClass:
+            theme === "dark"
+              ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400"
+              : "bg-white border-gray-300 text-gray-900 placeholder-gray-500",
+ 
+          subTextClass: theme === "dark" ? "text-gray-400" : "text-gray-500",
+          cardClassName: theme === "dark" ? "bg-gray-700 text-gray-100 border border-gray-600 p-3 rounded transform hover:scale-110 transition-transform duration-200" 
+          : "bg-purple-100 text-gray-900 p-3 rounded transform hover:scale-110 transition-transform duration-200",
+        };
       },
     }),
     {

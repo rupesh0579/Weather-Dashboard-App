@@ -41,7 +41,7 @@ export default function Login() {
             })}
             type="email"
             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-            placeholder="admin@weather.com"
+            placeholder="enter your email"
           />
           {errors.email && (
             <p className="mt-1 text-sm text-red-600">
